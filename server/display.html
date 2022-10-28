@@ -1,0 +1,64 @@
+<html lang="en">
+  <head>
+    <title>Codeboard Screecast Viewer</title>
+
+    <style type="text/css">
+      * {
+        padding: 0;
+        margin: 0;
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+  <body style="background: linear-gradient(45deg, #7b0909, #6771b8b8)">
+    <img style="width: 100vw; height: 100vh" src="" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- <script
+      src=
+      crossorigin="anonymous"
+    ></script> -->
+    <script type="module">
+      import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+
+      const room = prompt("Please enter room ID : ");
+      if (room.trim().length == 0) {
+        document.write("<h1> Room ID is mandatory to join </h1>");
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+
+      const socket = io.connect("http://127.0.0.1:5000");
+
+      socket.emit("join-message", room);
+
+      let interval = setInterval(() => {
+        socket.emit("get-screen-data", { room }, (response) => {
+          $("img").attr("src", "data:image/png;base64," + response);
+        });
+      }, 500);
+
+      $("img").mousemove(function (e) {
+        const posX = $(this).offset().left;
+        const posY = $(this).offset().top;
+
+        const x = e.pageX - posX;
+        const y = e.pageY - posY;
+
+        const obj = { x: x, y: y, room: room };
+        socket.emit("mouse-move", JSON.stringify(obj));
+      });
+
+      $("img").click(function (e) {
+        const obj = { room: room };
+        socket.emit("mouse-click", JSON.stringify(obj));
+      });
+
+      $(window).bind("keyup", function (e) {
+        const obj = { key: e.key, room: room };
+        socket.emit("type", JSON.stringify(obj));
+      });
+    </script>
+  </body>
+</html>
