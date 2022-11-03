@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <title>Codeboard Screecast Viewer</title>
@@ -14,10 +15,6 @@
     <img style="width: 100vw; height: 100vh" src="" />
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- <script
-      src=
-      crossorigin="anonymous"
-    ></script> -->
     <script type="module">
       import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
@@ -30,25 +27,61 @@
       }
 
       const socket = io.connect("http://127.0.0.1:5000");
+      const screen = document.querySelector("img");
+
+      let initWidth = 1024, initHeight = 720;
 
       socket.emit("join-message", room);
 
+      function debounce(func, wait, immediate) {
+        let timeout;
+        return function() {
+          let context = this, args = arguments;
+          let later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+          };
+          let callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) func.apply(context, args);
+        };
+      };
+
+      function getMousePos(screen, event){
+          let rect = screen.getBoundingClientRect(),
+              scaleX =  initWidth / screen.width,
+              scaleY = initHeight / screen.height;
+          console.log(`scales: ${scaleX} ${scaleY}`);
+          return {
+              x: (event.clientX - rect.left) * scaleX,
+              y: (event.clientY - rect.top) * scaleY
+          }
+      }
+
+      const deboundHandler = debounce(moveHandler, 200);
+
+      function moveHandler(event){
+          let pos = getMousePos(screen, event);
+
+          console.log(`Sent ${pos.x} ${pos.y}`);
+          const obj = { x: pos.x, y: pos.y, room: room };
+          socket.emit("mouse-move", JSON.stringify(obj));
+      }
+
       let interval = setInterval(() => {
+        socket.emit("on-get-screen", JSON.stringify({ room }));
         socket.emit("get-screen-data", { room }, (response) => {
-          $("img").attr("src", "data:image/png;base64," + response);
+          if (response) {
+            // console.log(response.width);
+            $("img").attr("src", "data:image/png;base64," + response.img);
+            initWidth = +response.width;
+            initHeight = +response.height;
+          }
         });
       }, 500);
 
-      $("img").mousemove(function (e) {
-        const posX = $(this).offset().left;
-        const posY = $(this).offset().top;
-
-        const x = e.pageX - posX;
-        const y = e.pageY - posY;
-
-        const obj = { x: x, y: y, room: room };
-        socket.emit("mouse-move", JSON.stringify(obj));
-      });
+      $("img").mousemove(deboundHandler);
 
       $("img").click(function (e) {
         const obj = { room: room };
@@ -56,7 +89,10 @@
       });
 
       $(window).bind("keyup", function (e) {
-        const obj = { key: e.key, room: room };
+        e.preventDefault();
+        const eKey = String(e.key);
+        const key = eKey.length != 1 ? eKey.toLowerCase() : eKey;
+        const obj = { key, room: room };
         socket.emit("type", JSON.stringify(obj));
       });
     </script>

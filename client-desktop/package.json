@@ -1,0 +1,13 @@
+{
+  "name": "client-desktop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "python3 main.py 'http://127.0.0.1:5000' 'jermoc_1'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

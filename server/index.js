@@ -5,6 +5,7 @@ const io = require("socket.io")(http, {
     origin: "*",
     methods: ["GET", "POST"],
   },
+  maxHttpBufferSize: 1e8 // 100 MB
 });
 
 const clients = [];
@@ -29,6 +30,8 @@ io.on("connection", (socket) => {
     const client = clients.find((c) => c.room == room);
     if (client) {
       client.img = imgStr;
+      client.width = obj.width;
+      client.height = obj.height;
     }
   });
 
@@ -36,10 +39,15 @@ io.on("connection", (socket) => {
     try {
       const room = data.room;
       const client = clients.find((c) => c.room == room);
-      cb(client ? client.img : "");
+      cb(client ? client : null);
     } catch (error) {
       console.log(error);
     }
+  });
+
+  socket.on("on-get-screen", function (data) {
+    const room = JSON.parse(data).room;
+    socket.broadcast.to(room).emit("on-get-screen", data);
   });
 
   socket.on("mouse-move", function (data) {
