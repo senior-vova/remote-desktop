@@ -26,7 +26,7 @@
         }, 2000);
       }
 
-      const socket = io.connect("http://127.0.0.1:5000");
+      const socket = io.connect("http://204.93.172.113:5000"); // http://127.0.0.1:5000
       const screen = document.querySelector("img");
 
       let initWidth = 1024,
@@ -80,7 +80,7 @@
             initHeight = +response.height;
           }
         });
-      }, 500);
+      }, 1500);
 
       $("img").mousemove(deboundHandler);
 
