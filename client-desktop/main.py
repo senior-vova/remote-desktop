@@ -31,15 +31,20 @@ def on_mouse_move(row):
 def on_mouse_click(row):
     data = json.loads(row)
     if data["room"] == client_id:
-        pyautogui.click(button="left")
+        try:
+            pyautogui.click(button="left")
+        except Exception:
+            print(data)
 
 @sio.on('type')
 def on_key_tap(row):
     data = json.loads(row)
-    print(data)
     if data["room"] == client_id:
-        keys = [str(data["key"])]
-        pyautogui.hotkey(*keys)
+        try:
+            keys = [str(data["key"])]
+            pyautogui.hotkey(*keys)
+        except Exception:
+            print(data)
 
 
 def app(url, client_id):
