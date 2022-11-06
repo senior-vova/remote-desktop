@@ -96,9 +96,9 @@
 
         key = key.replace("arrow", "");
         if (key == " ") key = "space";
-        if (e.ctrlKey) key += " ctrl";
-        if (e.altKey) key += " alt";
-        if (e.shiftKey) key += " shift";
+        // if (e.ctrlKey) key += " ctrl";
+        // if (e.altKey) key += " alt";
+        // if (e.shiftKey) key += " shift";
 
         const obj = { key, room: room };
         socket.emit("type", JSON.stringify(obj));
