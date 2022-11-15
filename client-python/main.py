@@ -79,11 +79,7 @@ def app(url, client_id):
 
 if __name__ == '__main__':
     url = sys.argv[1] # like "http://127.0.0.1:5000"
-    client_id = sys.argv[2] # like "jermoc_1"
+    client_id = sys.argv[2] # like "test123"
     app(url, client_id)
 
-# url = "http://127.0.0.1:5000"
-# client_id = "jermoc_1"
-
-# print("Connecting to " + url)
-# sio.connect(url)
+# python3 main.py "http://127.0.0.1:5000" "test123"
